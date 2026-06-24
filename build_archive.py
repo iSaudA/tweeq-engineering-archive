@@ -49,6 +49,15 @@ def text_from_html(markup: str) -> str:
     return re.sub(r"\s+", " ", clean).strip()
 
 
+def harden_links(markup: str) -> str:
+    return re.sub(
+        r'<a\s+href="(https?://[^"]+)"',
+        r'<a href="\1" target="_blank" rel="noopener noreferrer"',
+        markup,
+        flags=re.I,
+    )
+
+
 def first_image(markup: str) -> str:
     match = re.search(r'<img[^>]+src="([^"]+)"', markup, flags=re.I)
     return html.unescape(match.group(1)) if match else ""
@@ -121,6 +130,7 @@ def localize_assets(posts):
             return f'<img{before}src="../{src}"{after} loading="lazy">'
 
         post["content"] = image_pattern.sub(replace, post["content"])
+        post["content"] = harden_links(post["content"])
         if post["hero"] in image_map:
             post["hero"] = image_map[post["hero"]]
 
@@ -136,6 +146,8 @@ def page_shell(title, body, description="Tweeq Engineering archive"):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
   <meta name="description" content="{html.escape(description)}">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests">
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
@@ -160,7 +172,7 @@ def build_site(posts):
             f"""<article class="post-card" style="--delay:{idx * 80}ms">
   <a class="media" href="posts/{post['slug']}.html">{hero}</a>
   <div class="card-body">
-    <div class="meta"><a href="{post['author_url']}">{html.escape(post['author'])}</a><span>{post['display_date']}</span></div>
+    <div class="meta"><a href="{post['author_url']}" target="_blank" rel="noopener noreferrer">{html.escape(post['author'])}</a><span>{post['display_date']}</span></div>
     <h2><a href="posts/{post['slug']}.html">{html.escape(post['title'])}</a></h2>
     <p>{html.escape(post['excerpt'])}</p>
     <div class="tags">{tags}</div>
@@ -175,13 +187,15 @@ def build_site(posts):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tweeq Engineering Archive</title>
   <meta name="description" content="A preserved local archive of the Tweeq Engineering Medium publication.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-hero">
     <nav>
       <a class="brand" href="./">Tweeq Engineering</a>
-      <a href="https://engineering.tweeq.sa/feed">RSS Source</a>
+      <a href="https://engineering.tweeq.sa/feed" target="_blank" rel="noopener noreferrer">RSS Source</a>
     </nav>
     <div class="hero-grid">
       <div>
@@ -199,7 +213,7 @@ def build_site(posts):
     {''.join(index_cards)}
   </main>
   <footer>
-    <p>Original publication: <a href="https://engineering.tweeq.sa/">engineering.tweeq.sa</a>. This archive keeps outbound links intact for attribution and further reading.</p>
+    <p>Original publication: <a href="https://engineering.tweeq.sa/" target="_blank" rel="noopener noreferrer">engineering.tweeq.sa</a>. This archive keeps outbound links intact for attribution and further reading.</p>
   </footer>
   <script src="script.js"></script>
 </body>
@@ -212,12 +226,12 @@ def build_site(posts):
         body = f"""<header class="article-top">
   <nav>
     <a class="brand" href="../index.html">Tweeq Engineering</a>
-    <a href="{post['original_url']}">Original Medium Post</a>
+    <a href="{post['original_url']}" target="_blank" rel="noopener noreferrer">Original Medium Post</a>
   </nav>
   <div class="article-heading">
     <p class="eyebrow">{post['display_date']}</p>
     <h1>{html.escape(post['title'])}</h1>
-    <p class="byline">By <a href="{post['author_url']}">{html.escape(post['author'])}</a></p>
+    <p class="byline">By <a href="{post['author_url']}" target="_blank" rel="noopener noreferrer">{html.escape(post['author'])}</a></p>
     <div class="tags">{tags}</div>
   </div>
 </header>
@@ -227,7 +241,7 @@ def build_site(posts):
   </article>
 </main>
 <footer>
-  <p>Archived from <a href="{post['original_url']}">{html.escape(post['original_url'])}</a>.</p>
+  <p>Archived from <a href="{post['original_url']}" target="_blank" rel="noopener noreferrer">{html.escape(post['original_url'])}</a>.</p>
 </footer>"""
         (POSTS / f"{post['slug']}.html").write_text(
             page_shell(f"{post['title']} - Tweeq Engineering Archive", body, post["excerpt"]),
