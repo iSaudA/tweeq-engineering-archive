@@ -16,6 +16,7 @@ ASSETS = DIST / "assets"
 POSTS = DIST / "posts"
 RAW = ROOT / "archive-data"
 FEED_URL = "https://engineering.tweeq.sa/feed"
+FAVICON_URL = "https://miro.medium.com/v2/resize:fill:128:128/1*1n1Uz0ym7sRyVjJHUQ6jyQ.png"
 
 AUTHOR_LINKS = {
     "Yazeed AlKhalaf": "https://medium.com/@yazeedalkhalaf",
@@ -148,6 +149,8 @@ def page_shell(title, body, description="Tweeq Engineering archive"):
   <meta name="description" content="{html.escape(description)}">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/favicon.png">
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
@@ -163,6 +166,7 @@ def build_site(posts):
 
     shutil.copyfile(ROOT / "styles.css", DIST / "styles.css")
     shutil.copyfile(ROOT / "script.js", DIST / "script.js")
+    (ASSETS / "favicon.png").write_bytes(fetch(FAVICON_URL))
 
     index_cards = []
     for idx, post in enumerate(posts):
@@ -189,6 +193,8 @@ def build_site(posts):
   <meta name="description" content="A preserved local archive of the Tweeq Engineering Medium publication.">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
